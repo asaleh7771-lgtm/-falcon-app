@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Falcon</title>
+<style>
+body{margin:0;font-family:system-ui;background:#0b1220;color:#fff;padding:10px}
+h2{text-align:center;margin-bottom:10px}
+.box{background:#1e293b;padding:12px;border-radius:12px;margin-bottom:10px}
+input,select{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:none;background:#334155;color:#fff}
+button{width:100%;padding:12px;border:none;border-radius:10px;background:#38bdf8;color:#000;font-weight:bold;margin-top:6px}
+.card{background:#1e293b;padding:10px;border-radius:10px;margin-top:8px}
+.red{color:#f87171}.green{color:#4ade80}.yellow{color:#facc15}
+.top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<h2>🦅 Falcon</h2>
+<div class="top">
+<span id="count">0 طير</span>
+<span id="foodTotal">0g</span>
+</div>
+<div class="box">
+<input id="name" placeholder="اسم الطير">
+<input id="type" placeholder="النوع">
+<button onclick="addBird()">إضافة</button>
+</div>
+<div class="box">
+<select id="bird"></select>
+<input id="date" type="date">
+<input id="training" placeholder="نوع التدريب">
+<input id="food" placeholder="الأكل g">
+<input id="before" placeholder="قبل">
+<input id="after" placeholder="بعد">
+<button onclick="addTraining()">حفظ</button>
+</div>
+<div id="list"></div>
+<script>
+let data=JSON.parse(localStorage.falcon||'{"birds":[],"log":[]}')
+
+function save(){
+ localStorage.falcon=JSON.stringify(data)
+ loadBirds()
+}
+
+function addBird(){
+ if(!name.value)return
+ data.birds.push({id:Date.now(),name:name.value,type:type.value})
+ name.value="";type.value=""
+ save()
+}
+
+function loadBirds(){
+ bird.innerHTML=""
+ data.birds.forEach(b=>{
+  let o=document.createElement("option")
+  o.value=b.id
+  o.text=b.name
+  bird.appendChild(o)
+ })
+ count.innerText=data.birds.length+" طير"
+}
+loadBirds()
+
+function addTraining(){
+ data.log.push({
+  bird:bird.value,
+  date:date.value,
+  training:training.value,
+  food:food.value,
+  before:before.value,
+  after:after.value
+ })
+ save()
+ show()
+}
+
+function color(b,a){
+ b=Number(b);a=Number(a)
+ if(a>b)return '<span class="red">🔴 زاد</span>'
+ if(a<b)return '<span class="yellow">🟡 نقص</span>'
+ return '<span class="green">🟢 ثابت</span>'
+}
+
+function show(){
+ list.innerHTML=""
+ let total=0
+ data.log.forEach(t=>{
+  let b=data.birds.find(x=>x.id==t.bird)
+  total+=Number(t.food)||0
+  list.innerHTML+=`
+  <div class="card">
+  <b>${b?.name||""}</b><br>
+  ${t.training}<br>
+  ${t.food}g<br>
+  ${color(t.before,t.after)}
+  </div>`
+ })
+ foodTotal.innerText=total+"g"
+}
+show()
+</script>
+</body>
+</html>
+
